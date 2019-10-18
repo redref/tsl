@@ -27,7 +27,21 @@ after_success:
 - cp tsl.wasm build
 - cp wasm/index.js build
 - cp wasm/package.json build
--  sed -i "s|<%version%>|$(build/tsl version -r)|g" build/package.json
-
+- sed -i "s|<%version%>|$(build/tsl version -r)|g" build/package.json
 - cp $(go env GOROOT)/misc/wasm/wasm_exec.js build/wasm_exec.js
-# TODO: npm publish build dir steps
+
+# DOC: https://docs.travis-ci.com/user/deployment/releases/
+# Go to github -> Settings -> Developer settings -> Personal access tokens -> Generate new token
+#    - repo:status, repo_deployment, public_repo, write:packages, read:packages, user:email
+# Go to travis -> settings -> <your_repo> -> settings -> Environment Variables
+#    - Paste the token
+deploy:
+  provider: releases
+  api_key: "${GHTOKEN}"
+  file:
+  - "build/index.js"
+  - "build/package.json"
+  skip_cleanup: true
+  on:
+    tags: true
+  draft: true
